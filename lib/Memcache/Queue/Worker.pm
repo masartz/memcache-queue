@@ -9,10 +9,11 @@ sub work_safely {
     eval {
         $res = $class->work($job);
     };
-=put
     if (my $e = $@) {
         $manager->job_failed($job, $e);
+        return ;
     }
+=put
     if (!$job->is_completed) {
         $manager->job_failed($job, 'Job did not explicitly complete, fail, or get replaced');
     }

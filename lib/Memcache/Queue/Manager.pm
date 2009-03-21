@@ -1,16 +1,30 @@
 package Memcache::Queue::Manager;
 
 use Moose;
-use MooseX::WithCache;
+use Memcache::Queue::Log;
+has 'logger' => (
+    is      => 'ro' , 
+    does    => 'Memcache::Queue::Log',
+    default => sub { 
+        Memcache::Queue::Log->new(
+            dispatch_class => 'Screen',
+            dispatch_conf  => {
+                name      => 'TestLogger',
+                min_level => 'debug',
+                stderr    => 0,
+            },
+        );
+    },
+);
 
+use MooseX::WithCache;
 with_cache 'cache' => (
     backend => 'Cache::Memcached',
 );
-
+no MooseX::WithCache;
 
 __PACKAGE__->meta->make_immutable;
 no Moose;
-no MooseX::WithCache;
 
 use constant {
     QUEUE_EXPIRE => (60 * 60 ),
@@ -77,5 +91,11 @@ sub work_start{
 
 }
 
+sub job_failed{
+    my ($self, $job , $exception) = @_;
+
+    $self->logger->output( $job , $exception );
+
+}
 
 1;
