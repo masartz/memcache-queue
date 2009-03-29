@@ -13,7 +13,8 @@ my $manager = $mem_q->manager;
 #manager methods
 {
     isa_ok( $manager , 'Memcache::Queue::Manager' , 'Manager object OK');
-    can_ok( $manager , qw/ enqueue work_start 
+    can_ok( $manager , qw/ logger cache 
+                           enqueue work_start 
                            _get_cnt _assign_cnt _make_key / );
 }
 
