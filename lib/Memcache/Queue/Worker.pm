@@ -1,6 +1,14 @@
 package Memcache::Queue::Worker;
-use Moose::Role;
-requires 'work';
+use Moose;
+with 'Memcache::Queue::Role::Worker';
+
+sub work{
+    my $self = shift;
+
+    die 'this is abstract method!';
+}
+
+no Moose;
 
 sub work_safely {
     my ($class, $manager, $job) = @_;

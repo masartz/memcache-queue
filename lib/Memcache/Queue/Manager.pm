@@ -26,6 +26,7 @@ no MooseX::WithCache;
 __PACKAGE__->meta->make_immutable;
 no Moose;
 
+use UNIVERSAL::require;
 use constant {
     QUEUE_EXPIRE => (60 * 60 ),
     CLASS_CNT_EXPIRE => (60 * 60 * 24),
@@ -71,6 +72,8 @@ sub _make_key{
 
 sub work_start{
     my ($self, $work_class) = @_;
+
+    $work_class->use() or die;
 
     my $cnt = $self->_get_cnt( $work_class );
     

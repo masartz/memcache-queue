@@ -4,15 +4,12 @@ use warnings;
 use Test::More tests => 3;
 use Test::Output qw/ stdout_is /;
 use Memcache::Queue;
+use Memcache::Queue::Test;
+
+my $TEST_CLASS = 'Memcache::Queue::Test::01_Basic';
 
 # memcache clear
-{
-    use Cache::Memcached;
-    my $mem = Cache::Memcached->new({
-        servers => 'localhost:11211'
-    });
-    $mem->flush_all();
-}
+Memcache::Queue::Test::init_memcache();
 
 my $mem_q = Memcache::Queue->new();
 isa_ok( $mem_q , 'Memcache::Queue' , 'object new OK');
@@ -20,17 +17,7 @@ can_ok( $mem_q , qw/ manager / );
 
 my $manager = $mem_q->manager;
 
-$manager->enqueue('Worker::Test', {'arg'=>'TTTEEESSSTTT'} );
-stdout_is( sub { $manager->work_start( 'Worker::Test' );  } , 'TTTEEESSSTTT');
+$manager->enqueue($TEST_CLASS, {'arg'=>'TTTEEESSSTTT'} );
+stdout_is( sub { $manager->work_start( $TEST_CLASS );  } , 'TTTEEESSSTTT');
 
-
-package Worker::Test;
-use base qw/ Memcache::Queue::Worker /;
-
-sub work {
-    my ($class, $job) = @_;
-
-    print STDOUT $job->{arg};
-
-    return 1;
-}
+1;

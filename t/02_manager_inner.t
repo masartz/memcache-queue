@@ -3,9 +3,12 @@ use warnings;
 
 use Test::More tests => 8;
 use Memcache::Queue;
+use Memcache::Queue::Test;
+
+# memcache clear
+Memcache::Queue::Test::init_memcache();
 
 my $mem_q = Memcache::Queue->new();
-
 my $manager = $mem_q->manager;
 #manager methods
 {

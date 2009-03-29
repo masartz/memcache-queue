@@ -4,6 +4,12 @@ use warnings;
 use Test::More tests => 1;
 use Test::Output qw/ stdout_like /;
 use Memcache::Queue;
+use Memcache::Queue::Test;
+
+my $TEST_CLASS = 'Memcache::Queue::Test::04_Fail';
+
+# memcache clear
+Memcache::Queue::Test::init_memcache();
 
 my $mem_q = Memcache::Queue->new();
 
@@ -11,18 +17,8 @@ my $manager = $mem_q->manager;
 
 # single enqueue
 {
-    $manager->enqueue('Worker::Test', {'arg'=>'TTTEEESSSTTT'} );
-    use Data::Dumper;
-    stdout_like( sub { $manager->work_start( 'Worker::Test' );  } , qr/^Worker::Test ERROR !!!/ );
+    $manager->enqueue($TEST_CLASS, {'arg'=>'TTTEEESSSTTT'} );
+    stdout_like( sub { $manager->work_start( $TEST_CLASS );  } , qr/^$TEST_CLASS ERROR !!!/ );
 }
 
-package Worker::Test;
-use base qw/ Memcache::Queue::Worker /;
-
-sub work {
-    my ($class, $job) = @_;
-
-    die 'Worker::Test ERROR !!!';
-
-    return ;
-}
+1;
