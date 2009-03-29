@@ -5,7 +5,7 @@ use Memcache::Queue::Manager;
 our $VERSION = '0.01';
 
 has 'manager' => (
-    is         => 'rw',
+    is         => 'ro',
     isa        => 'Memcache::Queue::Manager',
     lazy_build => 1,
 );

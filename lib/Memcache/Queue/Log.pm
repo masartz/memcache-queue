@@ -12,7 +12,7 @@ has 'dispatch_conf' => (
 );
 
 has 'dispatch' =>(
-    is => 'rw',
+    is => 'ro',
     isa => 'Log::Dispatch',
     lazy_build => 1,
 );
