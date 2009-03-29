@@ -4,19 +4,24 @@ use Moose;
 use Memcache::Queue::Log;
 has 'logger' => (
     is      => 'ro' , 
-    does    => 'Memcache::Queue::Log',
-    default => sub { 
-        Memcache::Queue::Log->new(
-            dispatch_class => 'Screen',
-            dispatch_conf  => {
-                name      => 'TestLogger',
+    isa     => 'Memcache::Queue::Log',
+    lazy_build => 1,
+);
+has 'log_conf' =>(
+    is       => 'rw',
+    isa      => 'HashRef',
+    default  => sub{
+        +{
+            class     => 'Screen',
+            attribute => {
+                name      => 'Mem-Queue-Logger',
                 min_level => 'debug',
                 stderr    => 0,
-            },
-        );
+            }
+        }
     },
 );
-
+                
 use MooseX::WithCache;
 with_cache 'cache' => (
     backend => 'Cache::Memcached',
@@ -31,6 +36,15 @@ use constant {
     QUEUE_EXPIRE => (60 * 60 ),
     CLASS_CNT_EXPIRE => (60 * 60 * 24),
 };
+
+sub _build_logger{
+    my $self = shift;
+    
+    my $logger = Memcache::Queue::Log->new(
+        dispatch_conf => $self->log_conf
+    );
+    return $logger;
+}
 
 sub enqueue{
     my ($self, $work_class , $arg) = @_;

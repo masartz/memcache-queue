@@ -5,7 +5,7 @@ use Memcache::Queue::Manager;
 our $VERSION = '0.01';
 
 has 'manager' => (
-    is         => 'ro',
+    is         => 'rw',
     isa        => 'Memcache::Queue::Manager',
     lazy_build => 1,
 );
@@ -19,14 +19,17 @@ use constant {
 
 sub _build_manager{
     my $self = shift;
+
     Memcache::Queue::Manager->new(
-        cache  => Cache::Memcached->new({
-           servers            => SERVERS,
-           compress_threshold => 50_000,
-           ketama_points      => 150,
-           max_failures       => 3,
-           failure_timeout    => 2,
-        }),
+        cache  => Cache::Memcached->new(
+            {
+                servers            => SERVERS,
+                compress_threshold => 50_000,
+                ketama_points      => 150,
+                max_failures       => 3,
+                failure_timeout    => 2,
+            }
+        ),
     );
 }
 

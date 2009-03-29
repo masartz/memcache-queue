@@ -5,28 +5,14 @@ use UNIVERSAL::require;
 
 with qw/ Memcache::Queue::Role::Log /;
 
-has 'dispatch_class' => (
-    is => 'ro',
-    isa => 'Str',
-    required => 1,
-    default => 'Screen',
-);
-
 has 'dispatch_conf' => (
     is => 'ro',
-    isa => 'HashRef[Str]',
+    isa => 'HashRef',
     required => 1,
-    default => sub { 
-        +{
-            name      => 'Mem-Queue-Logger',
-            min_level => 'debug',
-            stderr    => 0,
-        }
-    },
 );
 
 has 'dispatch' =>(
-    is => 'ro',
+    is => 'rw',
     isa => 'Log::Dispatch',
     lazy_build => 1,
 );
@@ -38,10 +24,10 @@ sub _build_dispatch{
     my $self  = shift;
     
     my $dispatcher = Log::Dispatch->new;
-    my $class = "Log::Dispatch::$self->{dispatch_class}";
+    my $class = "Log::Dispatch::$self->{dispatch_conf}->{class}";
     $class->use or die $@;
     $dispatcher->add(
-       $class->new( %{$self->{dispatch_conf}} )
+       $class->new( %{ $self->{dispatch_conf}->{attribute} })
     ) or die $@;
    
     return $dispatcher;
