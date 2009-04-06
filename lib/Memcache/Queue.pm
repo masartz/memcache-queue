@@ -41,21 +41,68 @@ __END__
 
 =head1 NAME
 
-Memcache::Queue -
+Memcache::Queue - cheap Queue System using Memcached
 
 =head1 SYNOPSIS
 
+  ## sample_client.pl
   use Memcache::Queue;
+
+  my $mem_q = Memcache::Queue->new();
+  my $manager = $mem_q->manager;
+
+  $manager->enqueue(
+        'Test::Sample01',
+        {'arg'=>'sample_test'}
+  );
+
+
+  ## sample_worker.pl
+  use Memcache::Queue;
+
+  my $mem_q = Memcache::Queue->new();
+  my $manager = $mem_q->manager;
+
+  while(1){
+      $manager->work_start( 'Test::Sample01' );
+  }
+
+
+  ## lib/Test/Sample01.pm
+  package Test::Sample01;
+
+  use Moose;
+  extends 'Memcache::Queue::Worker';
+
+  override 'work' => sub {
+      my ($class, $job) = @_;
+
+      # output [sample_test]
+      print STDOUT $job->{arg};
+
+      return 1;
+  };
+
+  __PACKAGE__->meta->make_immutable;
+  no Moose;
+
 
 =head1 DESCRIPTION
 
-Memcache::Queue is
+Memcache::Queue is cheap Queue System.
+which use Memcached for Data Saving.
+
+This module repeat saving job like stack,
+so latest job is accepted faster than older job.
+
 
 =head1 AUTHOR
 
 Masartz E<lt>masartz {at} gmail.comE<gt>
 
 =head1 SEE ALSO
+
+L<TheSchwartz>
 
 =head1 LICENSE
 

@@ -37,7 +37,7 @@ sub _build_dispatch{
 sub output{
     my ($self, $job , $e) = @_;
 
-    $self->dispatch->log(level => 'debug', message => $e );
+    $self->dispatch->log(level => 'error', message => $e );
 }
 
 1;
