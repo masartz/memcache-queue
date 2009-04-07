@@ -5,3 +5,4 @@ TODO
    - 
  - LOW
    - Cache::Memcached::Fast使いたい
+   - 別環境からのpushテスト
