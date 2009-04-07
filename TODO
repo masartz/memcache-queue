@@ -1,10 +1,7 @@
 TODO
  - HIGH
-   - クラス設計
-   　Managerの位置
-     WorkerにはMoose::Role requires workと書きたい
-   - 一つのNameSpaceで一つのjobしか突っ込めてないのを修正
+   - use Moose;よりはuse Any::Moose;な流れなんだろうか
  - MIDDLE
-   - jobの失敗時の出力方法(Log::Dispatchでファイル？)
+   - 
  - LOW
    - Cache::Memcached::Fast使いたい
