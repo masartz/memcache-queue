@@ -8,7 +8,7 @@ sub init_memcache{
     my $self = shift;
 
     my $mem = Cache::Memcached->new({
-        servers => 'localhost:11211'
+        servers => ['localhost:11211','localhost:11211']
     });
     $mem->flush_all();
 }

@@ -14,7 +14,7 @@ my $manager = $mem_q->manager;
 {
     isa_ok( $manager , 'Memcache::Queue::Manager' , 'Manager object OK');
     can_ok( $manager , qw/ logger cache log_conf
-                           enqueue work_start job_failed
+                           enqueue dequeue work_start job_failed
                            _get_current_cnt _get_done_cnt _update_done_cnt
                            _assign_cnt _make_key _make_current_key _make_done_key
                            / );

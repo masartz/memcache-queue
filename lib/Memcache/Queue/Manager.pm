@@ -56,7 +56,16 @@ sub enqueue{
     $self->cache_set( $key , $arg , QUEUE_EXPIRE );
 
     return $cnt;
+}
 
+sub dequeue{
+    my ($self, $work_class , $cnt) = @_;
+
+    my $key = $self->_make_key( $work_class , $cnt );
+
+    $self->cache_del( $key );
+
+    return 1;
 }
 
 sub _get_current_cnt{
