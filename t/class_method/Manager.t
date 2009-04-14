@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 12;
 use Memcache::Queue;
 use Memcache::Queue::Test;
 
@@ -14,8 +14,10 @@ my $manager = $mem_q->manager;
 {
     isa_ok( $manager , 'Memcache::Queue::Manager' , 'Manager object OK');
     can_ok( $manager , qw/ logger cache log_conf
-                           enqueue work_start 
-                           _get_cnt _assign_cnt _make_key / );
+                           enqueue work_start job_failed
+                           _get_current_cnt _get_done_cnt _update_done_cnt
+                           _assign_cnt _make_key _make_current_key _make_done_key
+                           / );
 }
 
 # cache methods
@@ -26,11 +28,38 @@ my $manager = $mem_q->manager;
                          cache_get_multi cache_incr cache_decr / );
 }
 
-# _get_cnt
+# _make_current_key
 {
-    $manager->cache_set( 'TEST' , 10 , 5 );
-    is( $manager->_get_cnt( 'TEST') , 10 ,  '_get_cnt OK');
+    is( $manager->_make_current_key('TEST') , 'TEST' ,  '_make_current_key OK');
 }
+
+# _get_current_cnt
+{
+    $manager->cache_set(
+        $manager->_make_current_key('TEST') , 10 , 5
+    );
+    is( $manager->_get_current_cnt('TEST') , 10 ,  '_get_current_cnt OK');
+}
+
+# _make_done_key
+{
+    is( $manager->_make_done_key('TEST') , 'TEST_done' ,  '_make_done_key OK');
+}
+
+# _get_done_cnt
+{
+    $manager->cache_set(
+        $manager->_make_done_key('TEST') , 20 , 5
+    );
+    is( $manager->_get_done_cnt('TEST') , 20 ,  '_get_done_cnt OK');
+}
+
+# _udpate_done_cnt
+{
+    $manager->_update_done_cnt( 'TEST' , 30 );
+    is( 30 , $manager->_get_done_cnt('TEST') , '_udpate_done_cnt OK');
+}
+
 
 # _assign_cnt
 {

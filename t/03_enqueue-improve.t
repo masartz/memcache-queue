@@ -6,7 +6,7 @@ use Test::Output qw/ stdout_is /;
 use Memcache::Queue;
 use Memcache::Queue::Test;
 
-my $TEST_CLASS = 'Memcache::Queue::Test::03_Enqueue';
+my $TEST_CLASS = 'Memcache::Queue::Test::03_Dequeue';
 
 
 # memcache clear
@@ -26,7 +26,7 @@ my $manager = $mem_q->manager;
 {
     $manager->enqueue($TEST_CLASS , {'arg'=>'TEST2'} );
     $manager->enqueue($TEST_CLASS , {'arg'=>'test3'} );
-    stdout_is( sub { $manager->work_start( $TEST_CLASS  );  } , 'test3'.'TEST2');
+    stdout_is( sub { $manager->work_start( $TEST_CLASS  );  } , 'TEST2'.'test3');
 }
 
 1;

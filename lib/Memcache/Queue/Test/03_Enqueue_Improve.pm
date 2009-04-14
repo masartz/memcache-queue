@@ -1,4 +1,4 @@
-package Memcache::Queue::Test::03_Enqueue;
+package Memcache::Queue::Test::03_Enqueue_Improve;
 use Moose;
 extends 'Memcache::Queue::Worker';
 

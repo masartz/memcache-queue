@@ -59,20 +59,36 @@ sub enqueue{
 
 }
 
-sub _get_cnt{
+sub _get_current_cnt{
     my ($self, $work_class ) = @_;
 
-    return $self->cache_get( $work_class );
+    my $current_key = $self->_make_current_key($work_class);
+    return $self->cache_get( $current_key );
+}
+
+sub _get_done_cnt{
+    my ($self, $work_class ) = @_;
+
+    my $done_key = $self->_make_done_key($work_class);
+    return $self->cache_get( $done_key );
+}
+
+sub _update_done_cnt{
+    my ($self, $work_class , $cnt) = @_;
+
+    my $done_key = $self->_make_done_key($work_class);
+    $self->cache_set( $done_key , $cnt , CLASS_CNT_EXPIRE);
+    return ;
 }
 
 sub _assign_cnt{
     my ($self, $work_class ) = @_;
 
-    my $max_cnt = $self->_get_cnt( $work_class );
+    my $max_cnt = $self->_get_current_cnt( $work_class );
 
     my $key_cnt = $max_cnt ? ++$max_cnt : 1;
 
-    $self->cache_set( $work_class ,  $key_cnt , CLASS_CNT_EXPIRE );
+    $self->cache_set( $work_class , $key_cnt , CLASS_CNT_EXPIRE );
 
     return $key_cnt;
 }
@@ -83,25 +99,40 @@ sub _make_key{
     return sprintf("%s_%s" , $work_class , $cnt );
 }
 
+sub _make_current_key{
+    my ($self, $work_class ) = @_;
+
+    return sprintf("%s", $work_class);
+}
+
+sub _make_done_key{
+    my ($self, $work_class ) = @_;
+
+    return sprintf("%s_done" , $work_class);
+}
+
 
 sub work_start{
     my ($self, $work_class) = @_;
 
     $work_class->use() or die;
 
-    my $cnt = $self->_get_cnt( $work_class );
+    my $done_cnt = $self->_get_done_cnt( $work_class ) || 1;
     
     while(1){
-        my $key = $self->_make_key($work_class, $cnt);
+        last if ($done_cnt > $self->_get_current_cnt( $work_class ) );
+
+        my $key = $self->_make_key($work_class, $done_cnt);
         my $arg = $self->cache_get( $key );
 
-        last if ! $arg;
+        if( $arg ){
+            $self->cache_del( $key );
 
-        $self->cache_del( $key );
+            $work_class->work_safely( $self , $arg );
+        }
 
-        $work_class->work_safely( $self , $arg );
-
-        $cnt--;
+        $self->_update_done_cnt($work_class , $done_cnt);
+        $done_cnt++;
     }
 
     return 1;
