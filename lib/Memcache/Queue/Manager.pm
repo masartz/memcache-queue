@@ -68,11 +68,32 @@ sub dequeue{
     return 1;
 }
 
+sub _make_current_key{
+    my ($self, $work_class ) = @_;
+
+    return sprintf("%s", $work_class);
+}
+
 sub _get_current_cnt{
     my ($self, $work_class ) = @_;
 
     my $current_key = $self->_make_current_key($work_class);
     return $self->cache_get( $current_key );
+}
+
+sub _update_current_cnt{
+    my ($self, $work_class , $cnt) = @_;
+
+    my $current_key = $self->_make_current_key($work_class);
+    $self->cache_set( $current_key , $cnt , CLASS_CNT_EXPIRE);
+    return ;
+}
+
+
+sub _make_done_key{
+    my ($self, $work_class ) = @_;
+
+    return sprintf("%s_done" , $work_class);
 }
 
 sub _get_done_cnt{
@@ -97,7 +118,7 @@ sub _assign_cnt{
 
     my $key_cnt = $max_cnt ? ++$max_cnt : 1;
 
-    $self->cache_set( $work_class , $key_cnt , CLASS_CNT_EXPIRE );
+    $self->_update_current_cnt( $work_class , $key_cnt );
 
     return $key_cnt;
 }
@@ -106,18 +127,6 @@ sub _make_key{
     my ($self, $work_class , $cnt ) = @_;
 
     return sprintf("%s_%s" , $work_class , $cnt );
-}
-
-sub _make_current_key{
-    my ($self, $work_class ) = @_;
-
-    return sprintf("%s", $work_class);
-}
-
-sub _make_done_key{
-    my ($self, $work_class ) = @_;
-
-    return sprintf("%s_done" , $work_class);
 }
 
 
@@ -129,7 +138,7 @@ sub work_start{
     my $done_cnt = $self->_get_done_cnt( $work_class ) || 1;
     
     while(1){
-        last if ($done_cnt > $self->_get_current_cnt( $work_class ) );
+        last if $done_cnt > ($self->_get_current_cnt($work_class) || 0);
 
         my $key = $self->_make_key($work_class, $done_cnt);
         my $arg = $self->cache_get( $key );
